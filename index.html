@@ -27,14 +27,23 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 @keyframes cloud{from{left:-150px}to{left:calc(100% + 20px)}}
 @media (prefers-reduced-motion:reduce){.clouds{display:none}}
 .birds{position:absolute;left:0;right:0;top:0;bottom:30px;overflow:hidden;pointer-events:none}
+.bd{pointer-events:auto}
+.bd::after{content:"";position:absolute;left:-9px;right:-9px;top:-11px;bottom:-11px}
 .bd{position:absolute;left:-30px;animation:flyl var(--t) linear infinite;animation-delay:var(--d)}
 .bd.r{animation-name:flyr}
+.bd.dead{pointer-events:none;animation:fall 1.2s ease-in forwards}
+.bd.dead i{animation:none}
+@keyframes fall{from{transform:translateY(0) rotate(0);opacity:1}to{transform:translateY(170px) rotate(230deg);opacity:0}}
 .bd i{display:block;animation:bob var(--b) ease-in-out infinite alternate}
 .bd svg{display:block}
 @keyframes flyl{from{left:-30px}to{left:calc(100% + 10px)}}
 @keyframes flyr{from{left:calc(100% + 10px)}to{left:-30px}}
 @keyframes bob{from{transform:translateY(0)}to{transform:translateY(-14px)}}
 @media (prefers-reduced-motion:reduce){.birds{display:none}}
+#fx{position:fixed;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden}
+.zap{position:absolute;width:80px;height:80px;opacity:0;fill:none;stroke:#a9dcff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 2px #4aa3e0) drop-shadow(0 0 5px #2b8be0);animation:zap 2s ease-out forwards}
+@keyframes zap{0%{opacity:0;transform:translate(0,0) scale(.35)}6%{opacity:1}12%{opacity:.3}18%{opacity:1;transform:translate(calc(var(--dx)*.3),calc(var(--dy)*.3)) scale(.8)}38%{opacity:.8}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.5)}}
+@media (prefers-reduced-motion:reduce){#fx{display:none}}
 .head .logo{display:block;height:58px;width:auto;margin:0 0 6px}
 .head small{display:block;color:#0071bc;font-weight:600;font-size:15px;margin-bottom:6px}
 .head h1{font-size:44px;font-weight:700;color:#122e5e}
@@ -166,13 +175,28 @@ function clouds(){
  return h+'</div>';
 }
 var BIRDS=true;
+function birdHTML(c){
+ return '<span class="bd'+(c[4]?' r':'')+'" style="top:'+c[1]+'%;--t:'+c[2]+'s;--d:'+c[3]+'s"><i style="--b:'+c[5]+'s"><svg viewBox="0 0 20 12" width="'+c[0]+'" height="'+(c[0]*0.6).toFixed(1)+'"><path d="M0,8 Q5,0 10,7 Q15,0 20,8" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" dur="'+c[6]+'s" repeatCount="indefinite" values="M0,8 Q5,0 10,7 Q15,0 20,8;M0,4 Q5,10 10,7 Q15,10 20,4;M0,8 Q5,0 10,7 Q15,0 20,8"/></path></svg></i></span>';
+}
 function birds(){
  var cfg=[[18,18,13,-2,0,2.4,.5],[13,52,17,-9,1,3.1,.42],[22,34,10,-5,0,2.8,.6],[15,66,20,-14,1,3.6,.46],[11,8,15,-7,0,2.2,.38]];
  var h='<div class="birds" aria-hidden="true">';
- cfg.forEach(function(c){
-  h+='<span class="bd'+(c[4]?' r':'')+'" style="top:'+c[1]+'%;--t:'+c[2]+'s;--d:'+c[3]+'s"><i style="--b:'+c[5]+'s"><svg viewBox="0 0 20 12" width="'+c[0]+'" height="'+(c[0]*0.6).toFixed(1)+'"><path d="M0,8 Q5,0 10,7 Q15,0 20,8" fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" dur="'+c[6]+'s" repeatCount="indefinite" values="M0,8 Q5,0 10,7 Q15,0 20,8;M0,4 Q5,10 10,7 Q15,10 20,4;M0,8 Q5,0 10,7 Q15,0 20,8"/></path></svg></i></span>';
- });
+ cfg.forEach(function(c){h+=birdHTML(c)});
  return h+'</div>';
+}
+function newBird(){
+ var layer=document.querySelector('.birds');if(!layer)return;
+ var c=[11+Math.floor(Math.random()*12),8+Math.floor(Math.random()*60),10+Math.floor(Math.random()*11),0,Math.random()<.5?1:0,+(2.2+Math.random()*1.4).toFixed(1),+(.38+Math.random()*.22).toFixed(2)];
+ var t=document.createElement('div');t.innerHTML=birdHTML(c);layer.appendChild(t.firstChild);
+}
+function killBird(b){
+ if(b.classList.contains('dead'))return;
+ var layer=b.parentNode,r=b.getBoundingClientRect(),lr=layer.getBoundingClientRect();
+ b.style.left=(r.left-lr.left)+'px';b.style.top=(r.top-lr.top)+'px';
+ var sv=b.querySelector('svg');if(sv&&sv.pauseAnimations)sv.pauseAnimations();
+ b.classList.add('dead');
+ setTimeout(function(){if(b.parentNode)b.parentNode.removeChild(b)},1300);
+ setTimeout(newBird,1200+Math.random()*1800);
 }
 function headHTML(t){return '<header class="head">'+(CLOUDS?clouds():'')+(BIRDS?birds():'')+'<img class="logo" src="'+LOGO+'" alt="Anord Mardix, a Flex company">'+(MACHINE.location?'<small>'+esc(MACHINE.location)+'</small>':'')+'<h1 id="ht">'+esc(t||MACHINE.name)+'</h1>'+(MACHINE.model?'<p>'+esc(MACHINE.model)+'</p>':'')+'<svg class="mtn" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7 L600,33 L0,33 Z" style="fill:var(--bg)"/><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7" style="fill:none;stroke:var(--ink);stroke-width:2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></header>'}
 function head(t){var e=document.getElementById('ht');if(e)e.textContent=t||MACHINE.name;return ''}
@@ -214,6 +238,33 @@ function guide(k){
   document.getElementById('fin').classList.toggle('show',d===n);
  })});
 }
+var fx=document.createElement('div');fx.id='fx';fx.setAttribute('aria-hidden','true');document.body.appendChild(fx);
+function zapAt(x,y){
+ var n=2+Math.floor(Math.random()*2),base=Math.random()*6.28,C=40,sc=1,hd=document.querySelector('.head');
+ if(!hd)return;
+ var rr=hd.getBoundingClientRect();
+ if(!(x>=rr.left&&x<=rr.right&&y>=rr.top&&y<=rr.bottom))return;
+ for(var k=0;k<n;k++){
+  var a=base+k*(6.28/n)+(Math.random()-.5)*.8,len=(19+Math.random()*15)*sc,pts=[],br=[],seg=6;
+  for(var i=0;i<=seg;i++){
+   var t=i/seg,j=i&&i<seg?(Math.random()-.5)*7*sc:0;
+   var px=C+Math.cos(a)*len*t-Math.sin(a)*j,py=C+Math.sin(a)*len*t+Math.cos(a)*j;
+   pts.push(px.toFixed(1)+','+py.toFixed(1));
+   if(i==3){var b=a+(Math.random()<.5?.7:-.7);for(var m=0;m<=3;m++){var u=m/3*len*.34;br.push((px+Math.cos(b)*u+(m&&m<3?(Math.random()-.5)*3*sc:0)).toFixed(1)+','+(py+Math.sin(b)*u).toFixed(1));}}
+  }
+  var d=(24+Math.random()*20)*sc;
+  var el=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  el.setAttribute('class','zap');el.setAttribute('viewBox','0 0 80 80');
+  el.style.left=(x-C)+'px';el.style.top=(y-C)+'px';
+  el.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px');el.style.setProperty('--dy',(Math.sin(a)*d).toFixed(0)+'px');
+  el.style.animationDelay=(k*0.05)+'s';
+  el.innerHTML='<polyline points="'+pts.join(' ')+'"/><polyline points="'+br.join(' ')+'" style="stroke-width:'+(sc<1?.6:1)+'"/>';
+  fx.appendChild(el);
+  setTimeout((function(e){return function(){if(e.parentNode)e.parentNode.removeChild(e)}})(el),2200);
+ }
+ while(fx.children.length>24)fx.removeChild(fx.firstChild);
+}
+document.addEventListener('pointerdown',function(e){var b=e.target.closest&&e.target.closest('.bd');if(b)killBird(b);zapAt(e.clientX,e.clientY)},{passive:true});
 var cur=null;
 function show(k){cur=k;window.scrollTo(0,0);if(GUIDES[k]&&GUIDES[k].menu)submenu(k);else if(GUIDES[k])guide(k);else home()}
 function route(){var k=location.hash.replace('#','');if(k!==cur)show(k)}
