@@ -116,12 +116,15 @@ var GUIDES={
  emz:{icon:'machine',title:'EMZ',sub:'Coming soon',machine:true,menu:[]},
  ensis:{icon:'machine',title:'ENSIS',sub:'Coming soon',machine:true,menu:[]},
  pressbrakes:{icon:'machine',title:'Press Brakes',sub:'Coming soon',machine:true,menu:[]},
- errors:{icon:'alert',title:'Error codes and fixes',sub:'Find your error code',parent:'lcg',menu:['overtravelz','interlockz']},
+ errors:{icon:'alert',title:'Error codes and fixes',sub:'Find your error code',parent:'lcg',menu:['overtravelz','interlockz','ex0014']},
  overtravelz:{icon:'alert',title:'(Z) - OVERTRAVEL ( SOFT 1 )',sub:'How to fix',parent:'errors',nocheck:true,steps:[
   {t:'(Z) - OVERTRAVEL ( SOFT 1 )',noh:true,img:PIC_Z,d:FIX_Z}
  ]},
  interlockz:{icon:'alert',title:'INTERLOCK -Z',sub:'How to fix',parent:'errors',nocheck:true,steps:[
   {t:'INTERLOCK -Z',noh:true,img:PIC_Z,d:FIX_Z}
+ ]},
+ ex0014:{icon:'alert',title:'Z-SENSOR WIRE BREAKS',sub:'How to fix',parent:'errors',nocheck:true,steps:[
+  {t:'Z-SENSOR WIRE BREAKS',np:true,noh:true,d:'Check the nozzle. This error usually comes up if there is no nozzle or the nozzle is loose.'}
  ]},
  beginners:{icon:'book',title:'Beginners guide',sub:'Start here',parent:'lcg',menu:['load','offcut','single']},
  load:{icon:'play',title:'How to load a program',sub:'Step by step',parent:'beginners',steps:[
