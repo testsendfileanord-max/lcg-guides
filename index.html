@@ -99,7 +99,12 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 .note{margin-top:28px;font-size:14px;color:var(--muted);text-align:center}
 [hidden]{display:none!important}
 </style>
-<link rel="manifest" href="manifest.webmanifest">
+<script>(function(){
+var phone=/android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function add(a){var l=document.createElement('link');for(var k in a)l.setAttribute(k,a[k]);document.head.appendChild(l)}
+add({rel:'manifest',href:phone?'manifest.webmanifest':'manifest-desktop.webmanifest'});
+if(!phone){add({rel:'icon',type:'image/png',sizes:'192x192',href:'icon-192.png?v=3'});add({rel:'icon',type:'image/png',sizes:'512x512',href:'icon-512.png?v=3'})}
+})();</script>
 <meta name="theme-color" content="#0e1626">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <meta name="apple-mobile-web-app-capable" content="yes">

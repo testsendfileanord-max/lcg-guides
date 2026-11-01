@@ -1,0 +1,25 @@
+{
+  "name": "Machine Guides",
+  "short_name": "Guides",
+  "description": "Machine guides and instructions",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0e1626",
+  "theme_color": "#0e1626",
+  "icons": [
+    {
+      "src": "icon-192.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
