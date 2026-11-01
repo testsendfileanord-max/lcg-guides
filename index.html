@@ -21,15 +21,6 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 :root[data-theme="dark"] body::before{filter:brightness(0) invert(1)}
 .head{position:relative;isolation:isolate;background:#d6e0ee;color:#122e5e;margin:16px 0 0;padding:10px 12px 42px;border:2px solid var(--ink);border-bottom:0;border-radius:6px 6px 0 0}
 .head .mtn{position:absolute;left:-2px;bottom:0;width:calc(100% + 4px);height:32px;display:block}
-.sunwrap{position:absolute;left:0;right:0;top:0;bottom:30px;overflow:hidden;pointer-events:none;z-index:-1}
-.sun{position:absolute;top:-44px;right:-44px;width:76px;height:76px;animation:glow 4.5s ease-in-out infinite alternate}
-.sun svg{display:block;width:100%;height:100%}
-@keyframes glow{from{opacity:.85}to{opacity:1}}
-.shine{position:absolute;left:0;right:0;top:0;bottom:0;overflow:hidden;pointer-events:none}
-.shine::before{content:"";position:absolute;inset:0;background:radial-gradient(circle 440px at 100% 0,rgba(255,238,120,.85) 0,rgba(255,222,70,.45) 7%,rgba(255,232,110,.2) 25%,rgba(255,240,170,.07) 55%,rgba(255,240,170,0) 100%)}
-.shine::after{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 180deg at 100% 0,rgba(255,244,160,.2) 0 5deg,rgba(255,244,160,0) 5deg 15deg);-webkit-mask-image:radial-gradient(circle 440px at 100% 0,#000 0,transparent 100%);mask-image:radial-gradient(circle 440px at 100% 0,#000 0,transparent 100%);animation:shimmer 5s ease-in-out infinite alternate}
-@keyframes shimmer{from{opacity:.55}to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.sun,.shine::after{animation:none}}
 .clouds{position:absolute;left:0;right:0;top:0;bottom:30px;overflow:hidden;pointer-events:none;z-index:-1}
 .cl{position:absolute;left:-150px;opacity:.5;animation:cloud var(--t) linear infinite;animation-delay:var(--d)}
 .cl svg{display:block}
@@ -88,6 +79,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 </head>
 <body>
 <main>
+<div id="hdr"></div>
 <div id="app"></div>
 </main>
 <script>
@@ -163,11 +155,6 @@ var GUIDES={
 };
 var app=document.getElementById('app');
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-var SUN=true;
-function sun(){
- return '<div class="sunwrap" aria-hidden="true"><div class="sun"><svg viewBox="0 0 76 76"><defs><radialGradient id="sg"><stop offset="0" stop-color="#ffe94d"/><stop offset=".55" stop-color="#ffd60a" stop-opacity=".85"/><stop offset="1" stop-color="#ffd60a" stop-opacity="0"/></radialGradient></defs><circle cx="38" cy="38" r="38" fill="url(#sg)"/><circle cx="38" cy="38" r="21" fill="#ffd60a"/><circle cx="38" cy="38" r="21" fill="none" stroke="#fff6a8" stroke-width="2"/></svg></div></div>';
-}
-function shine(){return '<div class="shine" aria-hidden="true"></div>'}
 var CLOUDS=true;
 function clouds(){
  var cfg=[[120,6,70,-12],[84,38,52,-30],[100,58,64,-48],[70,22,46,-5]];
@@ -186,7 +173,9 @@ function birds(){
  });
  return h+'</div>';
 }
-function head(t){return '<header class="head">'+(CLOUDS?clouds():'')+(SUN?sun():'')+(BIRDS?birds():'')+'<img class="logo" src="'+LOGO+'" alt="Anord Mardix, a Flex company">'+(MACHINE.location?'<small>'+esc(MACHINE.location)+'</small>':'')+'<h1>'+esc(t||MACHINE.name)+'</h1>'+(MACHINE.model?'<p>'+esc(MACHINE.model)+'</p>':'')+(SUN?shine():'')+'<svg class="mtn" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7 L600,33 L0,33 Z" style="fill:var(--bg)"/><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7" style="fill:none;stroke:var(--ink);stroke-width:2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></header>'}
+function headHTML(t){return '<header class="head">'+(CLOUDS?clouds():'')+(BIRDS?birds():'')+'<img class="logo" src="'+LOGO+'" alt="Anord Mardix, a Flex company">'+(MACHINE.location?'<small>'+esc(MACHINE.location)+'</small>':'')+'<h1 id="ht">'+esc(t||MACHINE.name)+'</h1>'+(MACHINE.model?'<p>'+esc(MACHINE.model)+'</p>':'')+'<svg class="mtn" viewBox="0 0 600 32" preserveAspectRatio="none" aria-hidden="true"><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7 L600,33 L0,33 Z" style="fill:var(--bg)"/><path d="M0,24 L38,11 L66,21 L118,3 L168,23 L214,9 L256,21 L312,2 L362,22 L410,8 L456,19 L506,5 L552,18 L600,7" style="fill:none;stroke:var(--ink);stroke-width:2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg></header>'}
+function head(t){var e=document.getElementById('ht');if(e)e.textContent=t||MACHINE.name;return ''}
+document.getElementById('hdr').innerHTML=headHTML(MACHINE.name);
 function home(){
  var h=head('Machine guides')+'<nav class="menu" aria-label="Machines">';
  ['lcg','ae','emz','ensis'].forEach(function(k){var g=GUIDES[k];
