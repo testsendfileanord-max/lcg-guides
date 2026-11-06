@@ -66,6 +66,9 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 .vbox video{display:block;width:100%;max-height:78vh;background:#000;border-radius:8px;border:2px solid var(--ink)}
 .vx{position:absolute;right:0;top:-54px;min-height:46px;padding:8px 16px;border-radius:8px;border:2px solid var(--ink);background:var(--surface);color:var(--ink);font:600 17px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .vfail{margin:0;padding:22px;background:var(--surface);border:2px solid var(--ink);border-radius:8px;color:var(--ink);text-align:center}
+.toolimg{display:block;width:100%;height:auto;margin-top:4px;border-radius:6px;background:#000;cursor:zoom-in}
+.bigimg{display:block;width:100%;max-height:76vh;object-fit:contain;background:#000;border-radius:8px;border:2px solid var(--ink)}
+.vbox .cap{margin:10px 0 0;text-align:center;font-weight:600;font-size:19px;color:#f3ecb0}
 .head .logo{display:block;height:58px;width:auto;margin:0 0 6px}
 .head small{display:block;color:#0071bc;font-weight:600;font-size:15px;margin-bottom:6px}
 .head h1{font-size:44px;font-weight:700;color:#122e5e}
@@ -148,7 +151,29 @@ var PIC_Z='data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBw
 var FIX_Z='If you get this error, press the buttons step by step, as shown in the photo, and bring the machine back to home G50.';
 var GUIDES={
  lcg:{icon:'machine',title:'LCG',sub:'Open guides',machine:true,menu:['beginners','cleaning','lens','errors']},
- ae:{icon:'machine',title:'AE',sub:'Coming soon',machine:true,menu:[]},
+ ae:{icon:'machine',title:'AE',sub:'Open guides',machine:true,menu:['aebeg','aeclean','aeerr','aetools']},
+ aebeg:{icon:'book',title:'Beginners guide',sub:'Start here',parent:'ae',mach:'AE',menu:['aeload','aeutil']},
+ aeload:{icon:'play',title:'How to load a program',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Instructions coming soon.',menu:[]},
+ aeutil:{icon:'keys',title:'Utility buttons explained',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Button explanations coming soon.',menu:[]},
+ aeclean:{icon:'clean',title:'Machine cleaning',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
+ aeerr:{icon:'alert',title:'Error codes and fixes',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
+ aetools:{icon:'wrench',title:'Special Tools',sub:'Tool photos and names',parent:'ae',mach:'AE',menu:[],note:'Tap a photo to open it full size. Photos are only to see how each tool looks. Tool size might differ depending on the program.',items:[
+  {n:'SD 12.7x5.650',f:'sd-12-7x5-650'},
+  {n:'RE (SIZE)',f:'re-size'},
+  {n:'KI',f:'ki'},
+  {n:'Bottom Marking Centering',f:'bottom-marking-centering'},
+  {n:'PIRATE CAP',f:'pirate-cap'},
+  {n:'EM186',f:'em186'},
+  {n:'2MM RAD',f:'2mm-rad'},
+  {n:'CSK',f:'csk'},
+  {n:'AT044A',f:'at044a'},
+  {n:'HEX111',f:'hex111'},
+  {n:'CR6',f:'cr6'},
+  {n:'MARKING',f:'marking'},
+  {n:'SEMI 2MM',f:'semi-2mm'},
+  {n:'3-CLUSTER',f:'3-cluster'},
+  {n:'RE 19x14.8',f:'re-19x14-8'}
+ ]},
  emz:{icon:'machine',title:'EMZ',sub:'Coming soon',machine:true,menu:[]},
  ensis:{icon:'machine',title:'ENSIS',sub:'Coming soon',machine:true,menu:[]},
  pressbrakes:{icon:'machine',title:'Press Brakes',sub:'Coming soon',machine:true,menu:[]},
@@ -261,10 +286,11 @@ function home(){
 }
 function submenu(k){
  var g=GUIDES[k];
- var h=head(g.machine?g.title:'')+'<div class="top"><a class="back" href="#'+(g.parent||'')+'" style="text-decoration:none">‹ Back</a></div>';
+ var h=head(g.machine?g.title:(g.mach||''))+'<div class="top"><a class="back" href="#'+(g.parent||'')+'" style="text-decoration:none">‹ Back</a></div>';
  if(!g.machine)h+='<h2 style="font-size:34px;margin-top:8px">'+esc(g.title)+'</h2>';
  if(!g.menu.length&&!g.items)h+='<p class="meta" style="margin-top:14px">'+esc(g.soon||'Guides coming soon.')+'</p>';
- if(g.items)g.items.forEach(function(it){h+='<div class="ut"><div class="uth"><img class="ball" src="'+BALL+'" alt=""><b>'+esc(it.n)+'</b></div><p>'+esc(it.d)+'</p>'+(it.v?'<button type="button" class="vbtn" data-v="'+esc(it.v)+'">\u25b6 Watch video</button>':'')+'</div>'});
+ if(g.note)h+='<p class="meta" style="margin-top:6px">'+esc(g.note)+'</p>';
+ if(g.items)g.items.forEach(function(it){if(it.f){var sm=TOOLS_LIVE?'tools/'+it.f+'.jpg':it.tt,bg=TOOLS_LIVE?'tools/'+it.f+'-4k.jpg':it.tt;h+='<div class="ut"><div class="uth"><b>'+esc(it.n)+'</b></div><img class="toolimg" src="'+sm+'" data-big="'+bg+'" data-name="'+esc(it.n)+'" alt="'+esc(it.n)+'" loading="lazy" decoding="async"></div>';return}h+='<div class="ut"><div class="uth"><img class="ball" src="'+BALL+'" alt=""><b>'+esc(it.n)+'</b></div><p>'+esc(it.d)+'</p>'+(it.v?'<button type="button" class="vbtn" data-v="'+esc(it.v)+'">\u25b6 Watch video</button>':'')+'</div>'});
  if(g.menu.length){
   h+='<nav class="menu" aria-label="'+esc(g.title)+'">';
   g.menu.forEach(function(c){var x=GUIDES[c];h+='<a class="btn" href="#'+c+'">'+ic[x.icon]+'<div><b>'+esc(x.title)+'</b><span>'+esc(x.sub)+'</span></div></a>'});
@@ -343,6 +369,7 @@ window.addEventListener('appinstalled',hideInst);
 var UA=navigator.userAgent;
 if(/iphone|ipad|ipod/i.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)){setTimeout(function(){showInst('ios')},1800)}
 else if(/android/i.test(UA)){setTimeout(function(){showInst('manual')},2600)}
+var TOOLS_LIVE=true;
 var vm=null;
 function closeVideo(){if(!vm)return;var v=vm.querySelector('video');if(v){try{v.pause()}catch(e){}v.removeAttribute('src');try{v.load()}catch(e){}}if(vm.parentNode)vm.parentNode.removeChild(vm);vm=null}
 function openVideo(src){
@@ -357,6 +384,17 @@ function openVideo(src){
  document.body.appendChild(vm);
 }
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.vbtn');if(b)openVideo(b.getAttribute('data-v'))});
+function openImage(src,name){
+ closeVideo();
+ vm=document.createElement('div');vm.className='vm';vm.setAttribute('role','dialog');vm.setAttribute('aria-label',name||'Photo');
+ vm.innerHTML='<div class="vbox"><button type="button" class="vx">Close \u2715</button><img class="bigimg" alt=""><p class="cap"></p></div>';
+ var im=vm.querySelector('img');im.alt=name||'';im.src=src;vm.querySelector('.cap').textContent=name||'';
+ im.addEventListener('error',function(){var m=document.createElement('p');m.className='vfail';m.textContent='This photo can\u2019t be opened here.';if(im.parentNode)im.parentNode.replaceChild(m,im)});
+ vm.querySelector('.vx').onclick=closeVideo;
+ vm.addEventListener('click',function(e){if(e.target===vm)closeVideo()});
+ document.body.appendChild(vm);
+}
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.toolimg');if(t)openImage(t.getAttribute('data-big'),t.getAttribute('data-name'))});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeVideo()});
 var cur=null;
 function show(k){cur=k;window.scrollTo(0,0);if(GUIDES[k]&&GUIDES[k].menu)submenu(k);else if(GUIDES[k])guide(k);else home()}
