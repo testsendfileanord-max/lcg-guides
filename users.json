@@ -1,6 +1,9 @@
 {
  "v": 1,
- "admin": null,
+ "admin": {
+  "s": "bef3ca23dfecf233d02e0b652dbe1aac",
+  "h": "f7ddad4530e21ab8a674bc29bb46fa0fad8812d22d0cc525791c52b5b7ff1ae4"
+ },
  "users": [
   {
    "n": "Paddy",
