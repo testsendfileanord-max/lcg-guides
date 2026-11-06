@@ -689,6 +689,7 @@ function supBuild(){
  };
  document.getElementById('supsend').onclick=function(){
   if(SUP.busy)return;
+  if(!SESS){supSay('Please log in to send a message.');return}
   var msg=ta.value.trim();
   if(!msg){supSay('Please write your suggestion first.');ta.focus();return}
   if(document.getElementById('suphp').value){supSay('Sent. Thank you!',true);return}
@@ -719,7 +720,18 @@ function supBuild(){
  };
  supPhotos();
 }
-supBuild();
+// the Support button is only for people who are logged in, so every message carries a real nickname
+function supSync(){
+ var b=document.getElementById('supbtn'),p=document.getElementById('suppanel');if(!b||!p)return;
+ var on=!!SESS;b.style.display=on?'':'none';
+ if(!on){
+  if(!p.hidden){p.hidden=true;b.setAttribute('aria-expanded','false')}
+  var ta=document.getElementById('supmsg');if(ta){ta.value='';document.getElementById('supcnt').textContent='0 / 2000'}
+  SUP.photos.forEach(function(x){URL.revokeObjectURL(x.url)});SUP.photos=[];supPhotos();supSay('');
+ }
+}
+var _showBase=show;show=function(k){var r=_showBase(k);supSync();return r};
+supBuild();supSync();
 
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
