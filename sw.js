@@ -6,8 +6,8 @@ self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Pr
 self.addEventListener('fetch', e => {
   const r = e.request, u = new URL(r.url);
   if (r.method !== 'GET' || u.origin !== location.origin || /\.mp4$/i.test(u.pathname)) return;
-  e.respondWith(fetch(r).then(res => {
-    if (res.ok && res.status === 200) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(r, copy)); }
+  e.respondWith(fetch(r.url, { cache: 'no-cache' }).then(res => {
+    if (res.ok && res.status === 200) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(r.url, copy)); }
     return res;
-  }).catch(() => caches.match(r).then(m => m || caches.match('index.html'))));
+  }).catch(() => caches.match(r.url).then(m => m || caches.match('index.html'))));
 });
