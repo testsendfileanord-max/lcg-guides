@@ -134,6 +134,11 @@ body:has(.inst) .sup-btn{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 .sup-h b{font:700 26px 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif}
 .sup-x{min-height:40px;min-width:40px;border-radius:8px;border:2px solid var(--line);background:none;color:var(--ink);font-size:18px;cursor:pointer}
 .sup-i{margin:8px 0 0;font-size:15px;color:var(--muted);line-height:1.35}
+.sup-mach{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;padding:2px;border-radius:10px;border:2px solid transparent}
+.sup-mach.need{border-color:var(--warn)}
+.sup-mach button{min-height:44px;padding:0 14px;border-radius:22px;border:2px solid var(--line);background:none;color:var(--ink);font:600 16px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
+.sup-mach button[aria-checked="true"]{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.sup-req{color:var(--warn)}
 .sup-l{display:block;margin:12px 0 0;font-weight:600;font-size:16px}
 .sup-panel textarea{display:block;width:100%;min-height:120px;margin-top:6px;padding:10px 12px;border-radius:8px;border:2px solid var(--line);background:#0e1626;color:var(--ink);font:500 17px Barlow,system-ui,Arial,sans-serif;resize:vertical}
 .sup-panel textarea:focus{outline:none;border-color:var(--accent)}
@@ -652,7 +657,12 @@ SESS=loadSession();verifySession();
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')verifySession()});setInterval(verifySession,300000);
 window.addEventListener('hashchange',route);route();
 // ---------- support / suggestions: sends an email through a form service, the email address is never in this page ----------
-var SUP={ep:'',key:'',photos:[],busy:false,built:false};
+var SUP={ep:'',key:'',photos:[],busy:false,built:false,machine:''};
+function supMach(m){
+ SUP.machine=m||'';
+ [].forEach.call(document.querySelectorAll('#supmach button'),function(b){b.setAttribute('aria-checked',b.getAttribute('data-m')===SUP.machine?'true':'false')});
+ var g=document.getElementById('supmach');if(g&&SUP.machine)g.classList.remove('need');
+}
 function supConfig(){
  return fetch('support.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():{}}).then(function(j){
   var e=(j&&typeof j.endpoint==='string')?j.endpoint.trim():'';
@@ -682,7 +692,7 @@ function supShrink(file){return new Promise(function(res){
  img.onerror=function(){URL.revokeObjectURL(url);res(null)};
  img.src=url;
 })}
-function supSay(t,good){var st=document.getElementById('supst');if(!st)return;st.className='sup-st'+(good?' ok':'');st.textContent=t||''}
+function supSay(t,good){var st=document.getElementById('supst');if(!st)return;st.className='sup-st'+(good?' ok':'');st.textContent=t||'';if(t&&st.scrollIntoView)st.scrollIntoView({block:'nearest'})}
 function supPhotos(){
  var box=document.getElementById('supph');if(!box)return;
  box.innerHTML=SUP.photos.map(function(p,i){return '<div class="sup-th"><img src="'+p.url+'" alt="Photo '+(i+1)+'"><button type="button" data-i="'+i+'" aria-label="Remove photo '+(i+1)+'">\u2715</button></div>'}).join('');
@@ -697,6 +707,7 @@ function supBuild(){
  var p=document.createElement('div');p.className='sup-panel';p.id='suppanel';p.hidden=true;p.setAttribute('role','dialog');p.setAttribute('aria-label','Support and suggestions');
  p.innerHTML='<div class="sup-h"><b>Support</b><button type="button" class="sup-x" id="supx" aria-label="Close">\u2715</button></div>'+
   '<p class="sup-i">Have an idea, or is something missing from the manual? Suggest a new rule or instruction here and the developer will add it to the guides. You can also tell us about a problem.</p>'+
+  '<label class="sup-l" id="supmlab">Which machine is this about? <span class="sup-req">(required)</span></label><div class="sup-mach" id="supmach" role="radiogroup" aria-labelledby="supmlab">'+['LCG','AE','ENSIS','Press Brakes','EMZ'].map(function(m){return '<button type="button" role="radio" aria-checked="false" data-m="'+m+'">'+m+'</button>'}).join('')+'</div>'+
   '<label class="sup-l" for="supmsg">Your message</label><textarea id="supmsg" maxlength="2000" placeholder="Write your suggestion here\u2026"></textarea>'+
   '<div class="sup-cnt"><span id="supcnt">0 / 2000</span></div><div class="sup-ph" id="supph"></div>'+
   '<input type="file" id="supfile" accept="image/*" multiple hidden><button type="button" class="sup-add" id="supadd">\uFF0B Add photos <small>(up to 3)</small></button>'+
@@ -711,6 +722,7 @@ function supBuild(){
  b.onclick=function(){toggle()};
  document.getElementById('supx').onclick=function(){toggle(false);b.focus()};
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!p.hidden&&!document.querySelector('.vm')){toggle(false);b.focus()}});
+ [].forEach.call(document.querySelectorAll('#supmach button'),function(bn){bn.onclick=function(){supMach(bn.getAttribute('data-m'));supSay('')}});
  var ta=document.getElementById('supmsg');ta.oninput=function(){document.getElementById('supcnt').textContent=ta.value.length+' / 2000'};
  var fi=document.getElementById('supfile');
  document.getElementById('supadd').onclick=function(){fi.click()};
@@ -722,6 +734,7 @@ function supBuild(){
  document.getElementById('supsend').onclick=function(){
   if(SUP.busy)return;
   if(!SESS){supSay('Please log in to send a message.');return}
+  if(!SUP.machine){var mg=document.getElementById('supmach');mg.classList.add('need');supSay('Please choose the machine first.');var fb=mg.querySelector('button');if(fb)fb.focus();return}
   var msg=ta.value.trim();
   if(!msg){supSay('Please write your suggestion first.');ta.focus();return}
   if(document.getElementById('suphp').value){supSay('Sent. Thank you!',true);return}
@@ -729,23 +742,23 @@ function supBuild(){
   var go=this;go.disabled=true;SUP.busy=true;supSay('Sending\u2026');
   supConfig().then(function(){
    if(!SUP.ep)throw new Error('nocfg');
-   var who=(SESS&&SESS.n)?SESS.n:'(not logged in)',fd=new FormData(),page=location.hash||'#',ua=(navigator.userAgent||'').slice(0,140),subj='Guides: suggestion from '+who,pics=SUP.photosOK?SUP.photos:[];
+   var who=(SESS&&SESS.n)?SESS.n:'(not logged in)',mach=SUP.machine,fd=new FormData(),page=location.hash||'#',ua=(navigator.userAgent||'').slice(0,140),subj='Guides: '+mach+' suggestion from '+who,pics=SUP.photosOK?SUP.photos:[];
    if(SUP.kind==='forminit'){
-    fd.append('fi-sender-fullName',who);fd.append('fi-text-message',msg);fd.append('fi-text-page',page);fd.append('fi-text-device',ua);
+    fd.append('fi-sender-fullName',who);fd.append('fi-text-machine',mach);fd.append('fi-text-message','['+mach+'] '+msg);fd.append('fi-text-page',page);fd.append('fi-text-device',ua);
     pics.forEach(function(ph){fd.append('fi-file-photos[]',ph.blob,ph.name)});
     return fetch(SUP.ep,{method:'POST',body:fd}).then(supOk);
    }
    if(SUP.kind==='web3forms'||SUP.kind==='formspree'){
-    fd.append('message',msg);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);fd.append('subject',subj);
+    fd.append('message','['+mach+'] '+msg);fd.append('Machine',mach);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);fd.append('subject',subj);
     if(SUP.kind==='web3forms')fd.append('access_key',SUP.key);
     return fetch(SUP.ep,{method:'POST',body:fd,headers:{Accept:'application/json'}}).then(supOk);
    }
-   fd.append('message',msg);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);
+   fd.append('message','['+mach+'] '+msg);fd.append('Machine',mach);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);
    fd.append('_subject',subj);fd.append('_captcha','false');fd.append('_template','table');fd.append('_honey','');
    pics.forEach(function(ph,i){fd.append('attachment'+(i+1),ph.blob,ph.name)});
    return fetch(SUP.ep,{method:'POST',body:fd,mode:'no-cors'});
   }).then(function(){
-   lsSet('amSupT',String(Date.now()));ta.value='';document.getElementById('supcnt').textContent='0 / 2000';
+   lsSet('amSupT',String(Date.now()));supMach('');ta.value='';document.getElementById('supcnt').textContent='0 / 2000';
    SUP.photos.forEach(function(ph){URL.revokeObjectURL(ph.url)});SUP.photos=[];supPhotos();
    supSay('Sent. Thank you! The developer will read your suggestion.',true);
   }).catch(function(e){supSay(e&&e.message==='nocfg'?'Support is not connected yet. Please tell your supervisor.':'Could not send. Check your internet and try again.')}).then(function(){go.disabled=false;SUP.busy=false});
@@ -760,6 +773,7 @@ function supSync(){
  if(!on){
   if(!p.hidden){p.hidden=true;b.setAttribute('aria-expanded','false')}
   var ta=document.getElementById('supmsg');if(ta){ta.value='';document.getElementById('supcnt').textContent='0 / 2000'}
+  supMach('');
   SUP.photos.forEach(function(x){URL.revokeObjectURL(x.url)});SUP.photos=[];supPhotos();supSay('');
  }
 }
