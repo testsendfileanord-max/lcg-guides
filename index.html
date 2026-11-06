@@ -94,6 +94,14 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 .ad .small{font-size:15px;color:var(--muted)}
 .arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .arow b{flex:1;font-size:18px}.arow span{color:var(--muted);font-size:14px}
+.usb{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;padding:0 16px;border-radius:8px;border:2px solid var(--accent);background:none;color:var(--accent);font:700 26px 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif;cursor:pointer}
+.usb .chev{font-size:22px;transition:transform .2s}.usb[aria-expanded="true"] .chev{transform:rotate(180deg)}
+.ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;margin-top:4px}
+.ucard{background:#0e1626;border:2px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ucard>b{font-size:20px;overflow-wrap:anywhere}.ucard .d{font-size:14px;color:var(--muted)}
+.ucard.ed{grid-column:1/-1}
+.acts{display:flex;gap:8px;margin-top:10px}.ucard:not(.ed) .acts{flex-direction:column}.acts .del,.acts .edt{flex:1;width:100%}.acts .go{margin-top:0;min-height:46px;font-size:17px}
+.edt{min-height:40px;padding:0 12px;border-radius:8px;border:2px solid var(--accent);background:none;color:var(--accent);font:600 15px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .del{min-height:40px;padding:0 12px;border-radius:8px;border:2px solid var(--warn);background:none;color:var(--warn);font:600 15px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .head .logo{display:block;height:58px;width:auto;margin:0 0 6px}
 .head small{display:block;color:#0071bc;font-weight:600;font-size:15px;margin-bottom:6px}
@@ -511,12 +519,12 @@ function genPw(){var a='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 function adminView(){
  app.innerHTML=head('Admin')+'<div class="top"><a class="back" href="#" style="text-decoration:none">\u2039 Back</a></div><h2 style="font-size:34px;margin-top:8px">Manage users</h2><div id="adm"></div>';
  var box=document.getElementById('adm');
+ var uOpen=false,editing=null;
  function render(data,note){
   var hasTok=!!lsGet('amGhTok');
-  var rows=data.users.length?data.users.map(function(u){return '<div class="arow"><div style="flex:1"><b>'+esc(u.n)+'</b><br><span>added '+esc(u.c||'')+'</span></div><button type="button" class="del" data-d="'+esc(u.n)+'">Delete</button></div>'}).join(''):'<p class="small">No users yet.</p>';
   box.innerHTML=
    '<div class="ad"><h3>Add a user</h3><label>Nickname<input id="an" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="letters and numbers, 3 to 20"></label><label>Password<div class="pw"><input id="ap" autocomplete="off" placeholder="at least 6 characters"><button type="button" class="eye" id="ag">Make one</button></div></label><button type="button" class="go" id="aa">Add user</button><p class="err" id="am">'+(note||'')+'</p></div>'+
-   '<div class="ad"><h3>Users ('+data.users.length+')</h3>'+rows+'</div>'+
+   '<div id="ublk"></div>'+
    '<div class="ad"><h3>Saving</h3><p class="small">'+(hasTok?'Connected to <b>'+esc(ghRepo())+'</b>. New users and deletions are saved to the website straight away and work for everyone in about 1 to 2 minutes.':'To save users to the website, connect once with a GitHub token (steps are in my message). Until then you can only look at the list.')+'</p><label>Repository<input id="gr" value="'+esc(ghRepo())+'" autocapitalize="none" spellcheck="false"></label><label>GitHub token<input id="gt" type="password" autocomplete="off" placeholder="'+(hasTok?'saved on this device (type a new one to replace)':'paste the token here')+'"></label><button type="button" class="go alt" id="gs">Save connection</button><p class="err" id="gm"></p></div>'+
    '<div class="ad"><h3>Change admin password</h3><label>Current password<input id="cp" type="password" autocomplete="off"></label><label>New password<input id="np" type="password" autocomplete="off" placeholder="at least 8 characters"></label><button type="button" class="go alt" id="cg">Change password</button><p class="err" id="cm"></p></div>';
   var am=document.getElementById('am');
@@ -534,11 +542,46 @@ function adminView(){
      d.users.push({n:n,s:salt,h:h,c:new Date().toISOString().slice(0,10)});
    },'Add user '+n)}).then(function(d){render(d,'');var m=document.getElementById('am');m.className='err ok';m.textContent='Saved. Nickname: '+n+'   Password: '+p+'   (works in 1 to 2 minutes)'}).catch(function(e){b.disabled=false;am.className='err';am.textContent=e.message})
   };
-  [].forEach.call(box.querySelectorAll('.del'),function(b){b.onclick=function(){
-   var n=b.getAttribute('data-d');if(!confirm('Delete '+n+'? They will be logged out.'))return;
-   if(!hasTok){am.className='err';am.textContent='Connect to GitHub first (Saving box below).';return}
-   b.disabled=true;
-   change(function(d){d.users=d.users.filter(function(x){return x.n!==n})},'Delete user '+n).then(function(d){render(d,'')}).catch(function(e){b.disabled=false;am.className='err';am.textContent=e.message})}});
+  var ublk=document.getElementById('ublk');
+  function renderUsers(d,msg,ok){
+   var n=d.users.length,h='<div class="ad"><button type="button" class="usb" id="ub" aria-expanded="'+(uOpen?'true':'false')+'"><span>Users ('+n+')</span><span class="chev">\u25BE</span></button><p class="err'+(ok?' ok':'')+'" id="um">'+esc(msg||'')+'</p>';
+   if(uOpen){
+    h+=n?'<div class="ugrid">'+d.users.map(function(u){
+     if(editing===u.n)return '<div class="ucard ed"><b>Edit '+esc(u.n)+'</b><label>Nickname<input class="en" value="'+esc(u.n)+'" autocapitalize="none" autocomplete="off" spellcheck="false"></label><label>New password<div class="pw"><input class="ep" autocomplete="off" placeholder="empty = keep old"><button type="button" class="eye eg">Make one</button></div></label><div class="acts"><button type="button" class="go es">Save</button><button type="button" class="go alt ec">Cancel</button></div></div>';
+     return '<div class="ucard"><b>'+esc(u.n)+'</b><span class="d">added '+esc(u.c||'')+'</span><div class="acts"><button type="button" class="edt" data-e="'+esc(u.n)+'">Edit</button><button type="button" class="del" data-d="'+esc(u.n)+'">Delete</button></div></div>'}).join('')+'</div>':'<p class="small">No users yet.</p>';
+   }
+   ublk.innerHTML=h+'</div>';
+   var um=document.getElementById('um');
+   function say(t,good){um.className='err'+(good?' ok':'');um.textContent=t}
+   document.getElementById('ub').onclick=function(){uOpen=!uOpen;editing=null;renderUsers(d)};
+   [].forEach.call(ublk.querySelectorAll('.edt'),function(b){b.onclick=function(){editing=b.getAttribute('data-e');renderUsers(d);var i=ublk.querySelector('.en');if(i)i.focus()}});
+   [].forEach.call(ublk.querySelectorAll('.del'),function(b){b.onclick=function(){
+    var nm=b.getAttribute('data-d');if(!confirm('Delete '+nm+'? They will be logged out.'))return;
+    if(!hasTok){say('Connect to GitHub first (Saving box below).');return}
+    b.disabled=true;
+    change(function(x){x.users=x.users.filter(function(y){return y.n!==nm})},'Delete user '+nm).then(function(x){editing=null;renderUsers(x,'Deleted '+nm+'.',true)}).catch(function(e){b.disabled=false;say(e.message)})}});
+   var ec=ublk.querySelector('.ec');
+   if(ec){
+    ec.onclick=function(){editing=null;renderUsers(d)};
+    ublk.querySelector('.eg').onclick=function(){ublk.querySelector('.ep').value=genPw()};
+    ublk.querySelector('.es').onclick=function(){
+     var orig=editing,nn=ublk.querySelector('.en').value.trim(),pp=ublk.querySelector('.ep').value,sb=this;
+     if(!/^[A-Za-z0-9._-]{3,20}$/.test(nn)){say('Nickname: 3 to 20 letters, numbers, dot, dash or underscore.');return}
+     if(nn.toLowerCase()===ADMIN.n.toLowerCase()){say('That nickname is the admin\u2019s.');return}
+     if(pp&&pp.length<6){say('Password needs at least 6 characters.');return}
+     if(nn===orig&&!pp){say('Nothing changed.');return}
+     if(!hasTok){say('Connect to GitHub first (Saving box below).');return}
+     sb.disabled=true;say('Saving\u2026');
+     var salt=pp?newSalt():null;
+     (pp?pbk(pp,salt):Promise.resolve(null)).then(function(hh){return change(function(x){
+       if(x.users.some(function(y){return y.n!==orig&&y.n.toLowerCase()===nn.toLowerCase()}))throw new Error('That nickname already exists.');
+       var u=x.users.filter(function(y){return y.n===orig})[0];if(!u)throw new Error('That person is no longer in the list.');
+       u.n=nn;if(hh){u.s=salt;u.h=hh}
+      },'Edit user '+orig)}).then(function(x){editing=null;renderUsers(x,'Saved. Nickname: '+nn+(pp?'   Password: '+pp:'')+'   (works in 1 to 2 minutes, they will need to log in again)',true)}).catch(function(e){sb.disabled=false;say(e.message)})
+    };
+   }
+  }
+  renderUsers(data);
   document.getElementById('gs').onclick=function(){
    var gm=document.getElementById('gm'),r=document.getElementById('gr').value.trim(),t=document.getElementById('gt').value.trim();
    if(r)lsSet('amGhRepo',r);if(t)lsSet('amGhTok',t);
