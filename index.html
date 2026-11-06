@@ -387,12 +387,18 @@ function openVideo(src){
  document.body.appendChild(vm);
 }
 document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.vbtn');if(b)openVideo(b.getAttribute('data-v'))});
+function altList(path){var fn=path.split('/').pop(),l=[path,'tools/tools/'+fn,fn,'tools/'+fn],o=[];l.forEach(function(x){if(o.indexOf(x)<0)o.push(x)});return o}
+document.addEventListener('error',function(e){
+ var t=e.target;if(!t||t.tagName!=='IMG'||!(t.classList.contains('toolimg')||t.classList.contains('bigimg')))return;
+ if(!t._alts){t._alts=altList(t.getAttribute('src'));t._i=0}
+ t._i++;if(t._i<t._alts.length)t.src=t._alts[t._i];
+},true);
 function openImage(src,name,cut){
  closeVideo();
  vm=document.createElement('div');vm.className='vm';vm.setAttribute('role','dialog');vm.setAttribute('aria-label',name||'Photo');
  vm.innerHTML='<div class="vbox"><button type="button" class="vx">Close \u2715</button><img class="bigimg" alt=""><p class="cap"></p></div>';
  var im=vm.querySelector('img');im.alt=name||'';if(cut)im.className='bigimg cut';im.src=src;vm.querySelector('.cap').textContent=name||'';
- im.addEventListener('error',function(){var m=document.createElement('p');m.className='vfail';m.textContent='This photo can\u2019t be opened here.';if(im.parentNode)im.parentNode.replaceChild(m,im)});
+ im.addEventListener('error',function(){if(im._alts&&im._i<im._alts.length)return;var m=document.createElement('p');m.className='vfail';m.textContent='This photo can\u2019t be opened here.';if(im.parentNode)im.parentNode.replaceChild(m,im)});
  vm.querySelector('.vx').onclick=closeVideo;
  vm.addEventListener('click',function(e){if(e.target===vm)closeVideo()});
  document.body.appendChild(vm);
