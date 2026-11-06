@@ -94,6 +94,31 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 .ad .small{font-size:15px;color:var(--muted)}
 .arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .arow b{flex:1;font-size:18px}.arow span{color:var(--muted);font-size:14px}
+.sup-btn{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:8000;display:flex;align-items:center;gap:8px;min-height:52px;padding:0 18px 0 14px;border-radius:26px;border:2px solid var(--accent);background:var(--surface);color:var(--accent);font:700 18px Barlow,system-ui,Arial,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.5);cursor:pointer}
+.sup-btn svg{width:24px;height:24px;flex:none}
+.sup-panel{position:fixed;right:14px;bottom:calc(78px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100vw - 28px));max-height:calc(100vh - 110px);max-height:calc(100dvh - 110px);overflow:auto;z-index:8500;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 12px 40px rgba(0,0,0,.6);animation:supin .18s ease-out}
+.sup-panel[hidden]{display:none}
+body:has(.inst) .sup-btn{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+body:has(.inst) .sup-panel{bottom:calc(214px + env(safe-area-inset-bottom,0px))}
+@keyframes supin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.sup-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sup-h b{font:700 26px 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif}
+.sup-x{min-height:40px;min-width:40px;border-radius:8px;border:2px solid var(--line);background:none;color:var(--ink);font-size:18px;cursor:pointer}
+.sup-i{margin:8px 0 0;font-size:15px;color:var(--muted);line-height:1.35}
+.sup-l{display:block;margin:12px 0 0;font-weight:600;font-size:16px}
+.sup-panel textarea{display:block;width:100%;min-height:120px;margin-top:6px;padding:10px 12px;border-radius:8px;border:2px solid var(--line);background:#0e1626;color:var(--ink);font:500 17px Barlow,system-ui,Arial,sans-serif;resize:vertical}
+.sup-panel textarea:focus{outline:none;border-color:var(--accent)}
+.sup-cnt{text-align:right;font-size:13px;color:var(--muted);margin-top:2px}
+.sup-ph{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.sup-th{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:2px solid var(--line);background:#0e1626}
+.sup-th img{width:100%;height:100%;object-fit:cover;display:block}
+.sup-th button{position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:13px;border:none;background:rgba(5,10,20,.85);color:#fff;font-size:13px;cursor:pointer;padding:0}
+.sup-add{display:block;width:100%;min-height:46px;margin-top:8px;border-radius:8px;border:2px dashed var(--accent);background:none;color:var(--accent);font:600 16px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
+.sup-add small{font-weight:500;color:var(--muted)}
+.sup-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.sup-panel .go{margin-top:12px;min-height:50px;font-size:18px}
+.sup-st{min-height:22px;margin:8px 0 0;font-weight:600;color:var(--warn)}.sup-st.ok{color:var(--ok)}
+#app{padding-bottom:88px}
 .usb{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:58px;padding:0 16px;border-radius:8px;border:2px solid var(--accent);background:none;color:var(--accent);font:700 26px 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .usb .chev{font-size:22px;transition:transform .2s}.usb[aria-expanded="true"] .chev{transform:rotate(180deg)}
 .ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;margin-top:4px}
@@ -192,23 +217,7 @@ var GUIDES={
  aeutil:{icon:'keys',title:'Utility buttons explained',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Button explanations coming soon.',menu:[]},
  aeclean:{icon:'clean',title:'Machine cleaning',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
  aeerr:{icon:'alert',title:'Error codes and fixes',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
- aetools:{icon:'wrench',title:'Special Tools',sub:'Tool photos and names',parent:'ae',mach:'AE',menu:[],note:'Tap a tool to open it bigger. Photos are only to see how each tool looks. Tool size might differ depending on the program.',items:[
-  {n:'SD 12.7x5.650',f:'sd-12-7x5-650',e:'webp'},
-  {n:'RE (SIZE)',f:'re-size',e:'webp'},
-  {n:'KI',f:'ki',e:'webp'},
-  {n:'Bottom Marking Centering',f:'bottom-marking-centering',e:'webp'},
-  {n:'PIRATE CAP',f:'pirate-cap',e:'webp'},
-  {n:'EM186',f:'em186',e:'webp'},
-  {n:'2MM RAD',f:'2mm-rad',e:'webp'},
-  {n:'CSK',f:'csk',e:'webp'},
-  {n:'AT044A',f:'at044a',e:'webp'},
-  {n:'HEX111',f:'hex111',e:'webp'},
-  {n:'CR6',f:'cr6',e:'webp'},
-  {n:'MARKING',f:'marking',e:'jpg'},
-  {n:'SEMI 2MM',f:'semi-2mm',e:'webp'},
-  {n:'3-CLUSTER',f:'3-cluster',e:'webp'},
-  {n:'RE 19x14.8',f:'re-19x14-8',e:'webp'}
- ]},
+ aetools:{icon:'wrench',title:'Special Tools',sub:'Coming soon',parent:'ae',mach:'AE',soon:'Tool photos coming soon.',menu:[]},
  emz:{icon:'machine',title:'EMZ',sub:'Coming soon',machine:true,menu:[]},
  ensis:{icon:'machine',title:'ENSIS',sub:'Coming soon',machine:true,menu:[]},
  pressbrakes:{icon:'machine',title:'Press Brakes',sub:'Coming soon',machine:true,menu:[]},
@@ -611,6 +620,107 @@ document.addEventListener('click',function(e){
 SESS=loadSession();verifySession();
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')verifySession()});setInterval(verifySession,300000);
 window.addEventListener('hashchange',route);route();
+// ---------- support / suggestions: sends an email through a form service, the email address is never in this page ----------
+var SUP={ep:'',key:'',photos:[],busy:false,built:false};
+function supConfig(){
+ return fetch('support.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():{}}).then(function(j){
+  var e=(j&&typeof j.endpoint==='string')?j.endpoint.trim():'';
+  SUP.ep=/^https:\/\/(forminit\.com\/f\/|api\.web3forms\.com\/|formspree\.io\/f\/|formsubmit\.co\/)[A-Za-z0-9_\-\/.]*$/.test(e)?e:'';
+  SUP.key=(j&&typeof j.access_key==='string')?j.access_key.trim():'';
+  SUP.kind=/forminit\.com/.test(SUP.ep)?'forminit':/web3forms\.com/.test(SUP.ep)?'web3forms':/formspree\.io/.test(SUP.ep)?'formspree':'formsubmit';
+  SUP.photosOK=!!SUP.ep&&(SUP.kind==='forminit'||SUP.kind==='formsubmit');
+ },function(){SUP.ep='';SUP.key='';SUP.photosOK=false});
+}
+function supApply(){
+ if(SUP.photosOK===false){SUP.photos.forEach(function(p){URL.revokeObjectURL(p.url)});SUP.photos=[]}
+ supPhotos();
+}
+function supOk(r){
+ if(!r.ok)throw new Error('http');
+ return r.json().then(function(j){if(j&&(j.success===false||j.error))throw new Error('http')},function(){});
+}
+function supShrink(file){return new Promise(function(res){
+ if(!/^image\//.test(file.type||'')){res(null);return}
+ var url=URL.createObjectURL(file),img=new Image();
+ img.onload=function(){
+  var w=img.naturalWidth,h=img.naturalHeight,sc=Math.min(1,1600/Math.max(w,h)),c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));
+  var x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  c.toBlob(function(b){res(b?{blob:b,name:((file.name||'photo').replace(/\.[^.]+$/,'')||'photo')+'.jpg',url:URL.createObjectURL(b)}:null)},'image/jpeg',0.82);
+ };
+ img.onerror=function(){URL.revokeObjectURL(url);res(null)};
+ img.src=url;
+})}
+function supSay(t,good){var st=document.getElementById('supst');if(!st)return;st.className='sup-st'+(good?' ok':'');st.textContent=t||''}
+function supPhotos(){
+ var box=document.getElementById('supph');if(!box)return;
+ box.innerHTML=SUP.photos.map(function(p,i){return '<div class="sup-th"><img src="'+p.url+'" alt="Photo '+(i+1)+'"><button type="button" data-i="'+i+'" aria-label="Remove photo '+(i+1)+'">\u2715</button></div>'}).join('');
+ [].forEach.call(box.querySelectorAll('button'),function(b){b.onclick=function(){var p=SUP.photos.splice(+b.getAttribute('data-i'),1)[0];if(p)URL.revokeObjectURL(p.url);supPhotos()}});
+ var add=document.getElementById('supadd');if(add)add.style.display=(SUP.photos.length>=3||SUP.photosOK===false)?'none':'block';
+}
+function supBuild(){
+ if(SUP.built)return;SUP.built=true;
+ var b=document.createElement('button');b.type='button';b.className='sup-btn';b.id='supbtn';
+ b.setAttribute('aria-label','Support and suggestions');b.setAttribute('aria-haspopup','dialog');b.setAttribute('aria-expanded','false');
+ b.innerHTML='<svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 7h22v15H15l-6 5v-5H5z"/><path d="M11 12h10M11 17h6"/></svg><span>Support</span>';
+ var p=document.createElement('div');p.className='sup-panel';p.id='suppanel';p.hidden=true;p.setAttribute('role','dialog');p.setAttribute('aria-label','Support and suggestions');
+ p.innerHTML='<div class="sup-h"><b>Support</b><button type="button" class="sup-x" id="supx" aria-label="Close">\u2715</button></div>'+
+  '<p class="sup-i">Have an idea, or is something missing from the manual? Suggest a new rule or instruction here and the developer will add it to the guides. You can also tell us about a problem.</p>'+
+  '<label class="sup-l" for="supmsg">Your message</label><textarea id="supmsg" maxlength="2000" placeholder="Write your suggestion here\u2026"></textarea>'+
+  '<div class="sup-cnt"><span id="supcnt">0 / 2000</span></div><div class="sup-ph" id="supph"></div>'+
+  '<input type="file" id="supfile" accept="image/*" multiple hidden><button type="button" class="sup-add" id="supadd">\uFF0B Add photos <small>(up to 3)</small></button>'+
+  '<input class="sup-hp" id="suphp" tabindex="-1" autocomplete="off" aria-hidden="true">'+
+  '<button type="button" class="go" id="supsend">Send</button><p class="sup-st" id="supst" role="status" aria-live="polite"></p>';
+ document.body.appendChild(p);document.body.appendChild(b);
+ function toggle(open){
+  var show=open===undefined?p.hidden:open;p.hidden=!show;b.setAttribute('aria-expanded',show?'true':'false');
+  if(show){supSay('');supConfig().then(function(){supApply();if(!SUP.ep)supSay('Support is not connected yet. Please tell your supervisor.')});setTimeout(function(){document.getElementById('supmsg').focus()},50)}
+ }
+ b.onclick=function(){toggle()};
+ document.getElementById('supx').onclick=function(){toggle(false);b.focus()};
+ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!p.hidden&&!document.querySelector('.vm')){toggle(false);b.focus()}});
+ var ta=document.getElementById('supmsg');ta.oninput=function(){document.getElementById('supcnt').textContent=ta.value.length+' / 2000'};
+ var fi=document.getElementById('supfile');
+ document.getElementById('supadd').onclick=function(){fi.click()};
+ fi.onchange=function(){
+  var room=3-SUP.photos.length,list=[].slice.call(fi.files).slice(0,room);fi.value='';
+  if(!list.length)return;supSay('Preparing photos\u2026');
+  Promise.all(list.map(supShrink)).then(function(r){var bad=0;r.forEach(function(x){if(x)SUP.photos.push(x);else bad++});supPhotos();supSay(bad?'Some files were not photos and were skipped.':'')});
+ };
+ document.getElementById('supsend').onclick=function(){
+  if(SUP.busy)return;
+  var msg=ta.value.trim();
+  if(!msg){supSay('Please write your suggestion first.');ta.focus();return}
+  if(document.getElementById('suphp').value){supSay('Sent. Thank you!',true);return}
+  var last=+lsGet('amSupT')||0;if(Date.now()-last<30000){supSay('Please wait a moment before sending another message.');return}
+  var go=this;go.disabled=true;SUP.busy=true;supSay('Sending\u2026');
+  supConfig().then(function(){
+   if(!SUP.ep)throw new Error('nocfg');
+   var who=(SESS&&SESS.n)?SESS.n:'(not logged in)',fd=new FormData(),page=location.hash||'#',ua=(navigator.userAgent||'').slice(0,140),subj='Guides: suggestion from '+who,pics=SUP.photosOK?SUP.photos:[];
+   if(SUP.kind==='forminit'){
+    fd.append('fi-sender-fullName',who);fd.append('fi-text-message',msg);fd.append('fi-text-page',page);fd.append('fi-text-device',ua);
+    pics.forEach(function(ph){fd.append('fi-file-photos[]',ph.blob,ph.name)});
+    return fetch(SUP.ep,{method:'POST',body:fd}).then(supOk);
+   }
+   if(SUP.kind==='web3forms'||SUP.kind==='formspree'){
+    fd.append('message',msg);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);fd.append('subject',subj);
+    if(SUP.kind==='web3forms')fd.append('access_key',SUP.key);
+    return fetch(SUP.ep,{method:'POST',body:fd,headers:{Accept:'application/json'}}).then(supOk);
+   }
+   fd.append('message',msg);fd.append('From',who);fd.append('Page',page);fd.append('Device',ua);
+   fd.append('_subject',subj);fd.append('_captcha','false');fd.append('_template','table');fd.append('_honey','');
+   pics.forEach(function(ph,i){fd.append('attachment'+(i+1),ph.blob,ph.name)});
+   return fetch(SUP.ep,{method:'POST',body:fd,mode:'no-cors'});
+  }).then(function(){
+   lsSet('amSupT',String(Date.now()));ta.value='';document.getElementById('supcnt').textContent='0 / 2000';
+   SUP.photos.forEach(function(ph){URL.revokeObjectURL(ph.url)});SUP.photos=[];supPhotos();
+   supSay('Sent. Thank you! The developer will read your suggestion.',true);
+  }).catch(function(e){supSay(e&&e.message==='nocfg'?'Support is not connected yet. Please tell your supervisor.':'Could not send. Check your internet and try again.')}).then(function(){go.disabled=false;SUP.busy=false});
+ };
+ supPhotos();
+}
+supBuild();
+
 </script>
 <script>if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}</script>
 </body>
