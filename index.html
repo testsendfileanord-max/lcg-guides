@@ -66,10 +66,24 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;fi
 .vbox video{display:block;width:100%;max-height:78vh;background:#000;border-radius:8px;border:2px solid var(--ink)}
 .vx{position:absolute;right:0;top:-54px;min-height:46px;padding:8px 16px;border-radius:8px;border:2px solid var(--ink);background:var(--surface);color:var(--ink);font:600 17px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .vfail{margin:0;padding:22px;background:var(--surface);border:2px solid var(--ink);border-radius:8px;color:var(--ink);text-align:center}
+.tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+@media(min-width:520px){.tgrid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:820px){.tgrid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+.tile{display:flex;flex-direction:column;padding:0;margin:0;border:2px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden;cursor:pointer;color:var(--ink);font:inherit;text-align:center;aspect-ratio:1/1.2;-webkit-tap-highlight-color:transparent}
+.tile:active{transform:scale(.97)}
+.tile:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.tile img.toolimg{flex:1 1 0;min-height:0;width:100%;height:100%;margin:0;border-radius:0;object-fit:cover;object-position:50% 22%;background:#0e1626;display:block}
+.tile.tl img.toolimg{object-fit:contain;background:radial-gradient(ellipse at 50% 46%,#33497a 0%,#1d2d4e 55%,#14203a 100%)}
+.tile span.ml{font-size:11px;padding:4px 2px 0}
+.tile span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;height:calc(2.3em + 4px);padding:4px 5px 0;overflow:hidden;margin-bottom:5px;font:700 14px/1.15 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif;color:#f4ebb0;overflow-wrap:anywhere}
+.vm .vbox .cap{white-space:pre-line;margin:0 0 10px;text-align:left;font:700 40px/1.05 'Barlow Condensed',Barlow,system-ui,Arial,sans-serif;color:#f4ebb0;overflow-wrap:anywhere}
+.vm .vbox .cap:empty{display:none}
+.vm .vbox .cap[data-l]::before{content:attr(data-l);display:block;margin-bottom:2px;font:600 13px/1.2 Barlow,system-ui,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.vm .vbox .cap+.bigimg{max-height:66vh}
 .toolimg{display:block;width:100%;height:auto;margin-top:4px;border-radius:6px;background:#000;cursor:zoom-in}
 .ut.tl{background:radial-gradient(ellipse at 50% 46%,#33497a 0%,#1d2d4e 55%,#14203a 100%)}
-.toolimg.cut{background:none;max-height:56vh;object-fit:contain;filter:drop-shadow(0 12px 18px rgba(0,0,0,.55));margin:10px auto 6px}
-.bigimg.cut{background:none;border:none;max-height:78vh;filter:drop-shadow(0 12px 24px rgba(0,0,0,.6))}
+.toolimg.cut{background:none;max-height:56vh;object-fit:contain;margin:10px auto 6px}
+.bigimg.cut{background:none;border:none;max-height:78vh}
 .bigimg{display:block;width:100%;max-height:76vh;object-fit:contain;background:#000;border-radius:8px;border:2px solid var(--ink)}
 .vbox .cap{margin:10px 0 0;text-align:center;font-weight:600;font-size:19px;color:#f3ecb0}
 .lg{padding:14px 16px 18px;margin-top:16px}
@@ -264,7 +278,17 @@ var GUIDES={
  aeutil:{icon:'keys',title:'Utility buttons explained',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Button explanations coming soon.',menu:[]},
  aeclean:{icon:'clean',title:'Machine cleaning',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
  aeerr:{icon:'alert',title:'Error codes and fixes',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
- aetools:{icon:'wrench',title:'Special Tools',sub:'Coming soon',parent:'ae',mach:'AE',soon:'Tool photos coming soon.',menu:[]},
+ aetools:{icon:'wrench',title:'Special Tools',sub:'Tool photos and names',parent:'ae',mach:'AE',menu:[],note:'Tap a tool to open it bigger. Photos are only to see how each tool looks. Tool size might differ depending on the program.',items:[
+  {n:'KI',f:'ki-photo',e:'jpg'},
+  {n:'Pirate Cap',f:'pirate-cap',e:'jpg'},
+  {n:'EM186',f:'em186',e:'jpg'},
+  {n:'CSK',f:'csk',e:'jpg'},
+  {n:'SD12.7X5.650',f:'sd12-7x5-650',e:'jpg'},
+  {n:'2MM RAD',f:'2mm-rad',e:'jpg'},
+  {n:'RE19X14.8',f:'re19x14-8',e:'jpg'},
+  {n:'2MM SEMI',f:'2mm-semi',e:'jpg'},
+  {n:'CR6 Station B\nCR3 Station A',f:'cr6-cr3',e:'jpg'}
+ ]},
  emz:{icon:'machine',title:'EMZ',sub:'Coming soon',machine:true,menu:[]},
  ensis:{icon:'machine',title:'ENSIS',sub:'Coming soon',machine:true,menu:[]},
  pressbrakes:{icon:'machine',title:'Press Brakes',sub:'Coming soon',machine:true,menu:[]},
@@ -376,13 +400,17 @@ function home(){
  h+='</nav><nav class="menu" style="margin-top:14px" aria-label="Account">'+(SESS&&SESS.role==='admin'?'<a class="btn" href="#admin">'+ic.keys+'<div><b>Manage users</b><span>Add or remove people</span></div></a>':'')+'<a class="btn" href="#logout">'+ic.out+'<div><b>Log out</b><span>'+esc(SESS?SESS.n:'')+'</span></div></a></nav>';
  app.innerHTML=h;
 }
+function tn(n){var h=esc(n);h=(n.length>=11&&n.indexOf(' ')<0)?h.replace(/([xX\-\/])(?=[A-Za-z0-9])/g,'$1<wbr>'):h;return h.replace(/\n/g,'<br>')}
 function submenu(k){
  var g=GUIDES[k];
  var h=head(g.machine?g.title:(g.mach||''))+'<div class="top"><a class="back" href="#'+(g.parent||'')+'" style="text-decoration:none">‹ Back</a></div>';
  if(!g.machine)h+='<h2 style="font-size:34px;margin-top:8px">'+esc(g.title)+'</h2>';
  if(!g.menu.length&&!g.items)h+='<p class="meta" style="margin-top:14px">'+esc(g.soon||'Guides coming soon.')+'</p>';
  if(g.note)h+='<p class="meta" style="margin-top:6px">'+esc(g.note)+'</p>';
- if(g.items)g.items.forEach(function(it){if(it.f){var ex=it.e||'webp',cut=ex!=='jpg',sm=TOOLS_LIVE?'tools/'+it.f+'.'+ex+'?v=4':it.tt,bg=sm;h+='<div class="ut'+(cut?' tl':'')+'"><div class="uth"><b>'+esc(it.n)+'</b></div><img class="toolimg'+(cut?' cut':'')+'" src="'+sm+'" data-big="'+bg+'" data-name="'+esc(it.n)+'" data-cut="'+(cut?1:0)+'" alt="'+esc(it.n)+'" loading="lazy" decoding="async"></div>';return}h+='<div class="ut"><div class="uth"><img class="ball" src="'+BALL+'" alt=""><b>'+esc(it.n)+'</b></div><p>'+esc(it.d)+'</p>'+(it.v?'<button type="button" class="vbtn" data-v="'+esc(it.v)+'">\u25b6 Watch video</button>':'')+'</div>'});
+ var tiles=g.items&&g.items.some(function(x){return x.f});
+ if(tiles)h+='<div class="tgrid">';
+ if(g.items)g.items.forEach(function(it){if(it.f){var ex=it.e||'webp',cut=ex!=='jpg',full=TOOLS_LIVE?'tools/'+it.f+'.'+ex+'?v=9':(it.tb||it.tt),thumb=TOOLS_LIVE?'tools/'+it.f+'-s.'+ex+'?v=9':it.tt;h+='<button type="button" class="tile'+(cut?' tl':'')+'" data-big="'+full+'" data-name="'+esc(it.n)+'" data-cut="'+(cut?1:0)+'" aria-label="'+esc(it.n)+'"><img class="toolimg" src="'+thumb+'" data-full="'+full+'" alt="" loading="lazy" decoding="async"><span'+(it.n.indexOf('\n')>=0?' class="ml"':'')+'>'+tn(it.n)+'</span></button>';return}h+='<div class="ut"><div class="uth"><img class="ball" src="'+BALL+'" alt=""><b>'+esc(it.n)+'</b></div><p>'+esc(it.d)+'</p>'+(it.v?'<button type="button" class="vbtn" data-v="'+esc(it.v)+'">\u25b6 Watch video</button>':'')+'</div>'});
+ if(tiles)h+='</div>';
  if(g.menu.length){
   h+='<nav class="menu" aria-label="'+esc(g.title)+'">';
   g.menu.forEach(function(c){var x=GUIDES[c];h+='<a class="btn" href="#'+c+'">'+ic[x.icon]+'<div><b>'+esc(x.title)+'</b><span>'+esc(x.sub)+'</span></div></a>'});
@@ -479,20 +507,21 @@ document.addEventListener('click',function(e){var b=e.target.closest&&e.target.c
 function altList(path){var fn=path.split('/').pop(),l=[path,'tools/tools/'+fn,fn,'tools/'+fn],o=[];l.forEach(function(x){if(o.indexOf(x)<0)o.push(x)});return o}
 document.addEventListener('error',function(e){
  var t=e.target;if(!t||t.tagName!=='IMG'||!(t.classList.contains('toolimg')||t.classList.contains('bigimg')))return;
+ if(t.hasAttribute('data-full')&&!t._fb){t._fb=1;t.src=t.getAttribute('data-full');return}
  if(!t._alts){t._alts=altList(t.getAttribute('src'));t._i=0}
  t._i++;if(t._i<t._alts.length)t.src=t._alts[t._i];
 },true);
-function openImage(src,name,cut){
+function openImage(src,name,cut,label){
  closeVideo();
  vm=document.createElement('div');vm.className='vm';vm.setAttribute('role','dialog');vm.setAttribute('aria-label',name||'Photo');
- vm.innerHTML='<div class="vbox"><button type="button" class="vx">Close \u2715</button><img class="bigimg" alt=""><p class="cap"></p></div>';
- var im=vm.querySelector('img');im.alt=name||'';if(cut)im.className='bigimg cut';im.src=src;vm.querySelector('.cap').textContent=name||'';
+ vm.innerHTML='<div class="vbox"><button type="button" class="vx">Close \u2715</button><p class="cap"></p><img class="bigimg" alt=""></div>';
+ var im=vm.querySelector('img');im.alt=name||'';if(cut)im.className='bigimg cut';im.src=src;vm.querySelector('.cap').textContent=name||'';if(label&&name)vm.querySelector('.cap').setAttribute('data-l',label);
  im.addEventListener('error',function(){if(im._alts&&im._i<im._alts.length)return;var m=document.createElement('p');m.className='vfail';m.textContent='This photo can\u2019t be opened here.';if(im.parentNode)im.parentNode.replaceChild(m,im)});
  vm.querySelector('.vx').onclick=closeVideo;
  vm.addEventListener('click',function(e){if(e.target===vm)closeVideo()});
  document.body.appendChild(vm);
 }
-document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.toolimg');if(t)openImage(t.getAttribute('data-big'),t.getAttribute('data-name'),t.getAttribute('data-cut')==='1')});
+document.addEventListener('click',function(e){var t=e.target.closest&&e.target.closest('.tile');if(t)openImage(t.getAttribute('data-big'),t.getAttribute('data-name'),t.getAttribute('data-cut')==='1','Tool name')});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeVideo()});
 // ---------- login ----------
 var ADMIN={n:'Grantas',s:'2971af900ca23c58c8bbbb41fcfd73eb',h:'b32bd3ae1957164b11a9e8165c6bea88ed2f6e102892fd75f5e5863cc1a9042f'},ITER=150000,SESS=null,FAILS=0,LOCKT=0,loginRole='user';
@@ -844,6 +873,8 @@ function aiIndex(){
 }
 function aiIdf(t){var n=AI.kb.length,d=AI.df[t]||0;return Math.log(1+(n-d+0.5)/(d+0.5))}
 var AI_PRIOR={guide:1.35,step:1,item:1,menu:.75,soon:1.1};
+var AI_MACH={};['lcg','ae','ensis','emz','press','brake'].forEach(function(w){AI_MACH[aiStem(w)]=1});
+var AI_MACH_KEY={lcg:'lcg',ae:'ae',ensis:'ensis',emz:'emz',press:'pressbrakes',brake:'pressbrakes'};
 var AI_FLUFF={};('properly correctly quickly easily daily weekly often always never right wrong again first last next example exactly safely safe really actually simply mean meaning explain explained difference different best good bad new old correct incorrect quick easy fast slow normal normally usually sometimes everyday day days week weeks hour hours minute minutes time times way ways'.split(' ')).forEach(function(w){AI_FLUFF[aiStem(w)]=1});
 function aiSearch(q){
  aiIndex();
@@ -859,7 +890,7 @@ function aiSearch(q){
    if(!tf&&AI_SYN[t]){for(var i=0;i<AI_SYN[t].length;i++){var s=AI_SYN[t][i];if(c.tf[s]){tf=c.tf[s];w=.55;u=s;break}}}
    if(tf){m++;sc+=w*aiIdf(u)*tf*2.2/(tf+1.2*(0.25+0.75*c.len/AI.avg))}
   });
-  if(m>=need&&sc>0)hits.push({c:c,sc:sc*(AI_PRIOR[c.kind]||1),m:m});
+  if(m>=need&&sc>0){if(c.tt[aiStem('machine')]&&terms.some(function(t){return AI_MACH[t]}))sc+=1.2;hits.push({c:c,sc:sc*(AI_PRIOR[c.kind]||1),m:m})}
  });
  hits.sort(function(a,b){return b.sc-a.sc});
  return {none:false,terms:terms,hits:hits};
@@ -888,6 +919,7 @@ function aiNotFound(q,why){
 function aiLocal(q){
  var r=aiSearch(q);
  if(r.none)return {found:false,html:'<p>Type a question about the guides, for example <i>how do I clean the lens?</i></p>',acts:'',imgs:[]};
+ if(r.terms&&r.terms.length&&r.terms.every(function(t){return AI_MACH[t]})){var mk=AI_MACH_KEY[r.terms[0]];var mc=AI.kb.filter(function(c){return c.id===mk&&c.kind==='menu'})[0];if(mc)r.hits=[{c:mc,sc:99,m:1}]}
  if(!r.hits.length)return aiNotFound(q);
  var real=r.hits.filter(function(x){return x.c.kind!=='soon'}),soonHit=r.hits.filter(function(x){return x.c.kind==='soon'})[0];
  var soonTitle=r.hits.filter(function(x){return x.c.kind==='soon'&&r.terms.some(function(t){return x.c.tt[t]})})[0];
@@ -914,7 +946,7 @@ function aiLocal(q){
  if(top.kind!=='menu')acts+='<button type="button" data-k="'+top.k+'">Open this guide</button>';
  var seen={};seen[top.k]=1;var rel=[];
  r.hits.slice(1).forEach(function(x){if(!seen[x.c.k]&&x.sc>=r.hits[0].sc*0.55&&rel.length<2&&x.c.kind!=='soon'){seen[x.c.k]=1;rel.push(x.c)}});
- rel.forEach(function(c){acts+='<button type="button" class="alt" data-k="'+c.k+'">Also: '+esc(c.title)+'</button>'});
+ rel.forEach(function(c){acts+='<button type="button" class="alt" data-k="'+c.k+'">Also: '+esc(c.path.split(' > ')[0])+' \u2013 '+esc(c.title)+'</button>'});
  return {found:true,html:h,acts:acts,imgs:imgs};
 }
 function aiFromRemote(j,q){
