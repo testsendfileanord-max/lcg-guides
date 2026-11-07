@@ -249,7 +249,18 @@ var GUIDES={
  lcg:{icon:'machine',title:'LCG',sub:'Open guides',machine:true,menu:['beginners','cleaning','lens','errors']},
  ae:{icon:'machine',title:'AE',sub:'Open guides',machine:true,menu:['aebeg','aeclean','aeerr','aetools']},
  aebeg:{icon:'book',title:'Beginners guide',sub:'Start here',parent:'ae',mach:'AE',menu:['aeload','aeutil']},
- aeload:{icon:'play',title:'How to load a program',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Instructions coming soon.',menu:[]},
+ aeload:{icon:'play',title:'How to load a program',sub:'Step by step',parent:'aebeg',mach:'AE',steps:[
+  {t:'Open the Schedule screen',np:true,d:'Make sure you are on the Schedule screen. Then press Open at the bottom left of the screen.'},
+  {t:'Find the program',np:true,l:[
+   'Make sure the AE folder is selected on the left. The folder depends on which machine and program you are running.',
+   'In the Enter key box, type the program name and add * at the end. Example: JC1-9499*',
+   'Press ENTER on the keyboard.',
+   'Highlight the program in the list. It must turn green.',
+   'Press OK.'
+  ]},
+  {t:'Choose the quantity',np:true,d:'Choose the amount you need to cut and add it. The program then loads onto the schedule list.'},
+  {t:'Example Video',nonum:true,nochk:true,video:'ae-load-program.mp4#t=0.1',d:''}
+ ]},
  aeutil:{icon:'keys',title:'Utility buttons explained',sub:'Coming soon',parent:'aebeg',mach:'AE',soon:'Button explanations coming soon.',menu:[]},
  aeclean:{icon:'clean',title:'Machine cleaning',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
  aeerr:{icon:'alert',title:'Error codes and fixes',sub:'Coming soon',parent:'ae',mach:'AE',menu:[]},
@@ -381,7 +392,7 @@ function submenu(k){
 }
 function guide(k){
  var g=GUIDES[k],n=g.steps.length,nc=g.steps.filter(function(x){return !x.nochk}).length;
- var h=head()+'<div class="top"><a class="back" href="#'+(g.parent||'')+'" style="text-decoration:none">‹ Back</a></div>';
+ var h=head(g.mach)+'<div class="top"><a class="back" href="#'+(g.parent||'')+'" style="text-decoration:none">‹ Back</a></div>';
  h+='<h2 style="font-size:34px">'+esc(g.title)+'</h2><p class="meta">'+esc(g.sub)+'</p>';
  if(!g.nocheck)h+='<div class="prog"><div class="bar"><i id="fill"></i></div><p id="count">0 of '+nc+' steps done</p></div>';
  g.steps.forEach(function(s,i){
