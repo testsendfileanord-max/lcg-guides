@@ -129,6 +129,8 @@ body:has(.inst) .ai-btn{bottom:calc(212px + env(safe-area-inset-bottom,0px))}
 .ai-acts button{min-height:40px;padding:0 12px;border-radius:8px;border:2px solid var(--accent);background:none;color:var(--accent);font:600 15px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .ai-acts button.alt{border-color:var(--line);color:var(--ink)}
 .ai-no b{color:var(--warn)}
+.ai-sg{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.ai-sg button{min-height:36px;padding:0 12px;border-radius:18px;border:1px solid var(--accent);background:none;color:var(--accent);font:600 14px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .ai-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .ai-chips button{min-height:36px;padding:0 10px;border-radius:18px;border:1px solid var(--line);background:none;color:var(--ink);font:500 14px Barlow,system-ui,Arial,sans-serif;cursor:pointer}
 .ai-in{display:flex;gap:8px}.ai-in input{flex:1;min-width:0;min-height:48px;padding:8px 12px;border-radius:8px;border:2px solid var(--line);background:#0e1626;color:var(--ink);font:500 17px Barlow,system-ui,Arial,sans-serif}
@@ -822,7 +824,7 @@ var _showBase=show;show=function(k){var r=_showBase(k);supSync();return r};
 supBuild();supSync();
 
 // ---------- AI assistant: answers ONLY from the guides in this page; says so when it is not in the guide ----------
-var AI={kb:null,idx:null,hist:[],busy:false,ep:'',built:false};
+var AI={kb:null,idx:null,hist:[],busy:false,ep:'',built:false,last:null,lastQ:''};
 var AI_STOP={};('a an the is are was were be been am do does did how what which who where when why can could should would will to of in on at for from with by and or but if it its my me i you your we our us this that these those there here please tell show about into out up down get got have has had need want wanna like just also any some then than so very much more most use using make made work works need needs help guide guides thing things'.split(' ')).forEach(function(w){AI_STOP[w]=1});
 function aiStem(w){
  if(!/^[a-z]+$/.test(w))return w;
@@ -915,17 +917,42 @@ function aiMediaHtml(list){
  return {html:h,acts:acts,imgs:imgs.slice(0,4)};
 }
 function aiNotFound(q,why){
- return {found:false,html:'<div class="ai-no"><p><b>'+esc(why||'That\u2019s not in our guide.')+'</b></p><p>Ask in different words, or suggest it so the developer can add it.</p></div>',acts:'<button type="button" class="alt" data-sug="'+esc(q)+'">Suggest it to the developer</button>',imgs:[]};
+ return {found:false,kind:'notfound',html:'<div class="ai-no"><p><b>'+esc(why||'That\u2019s not in our guide.')+'</b></p><p>Ask in different words, or suggest it so the developer can add it.</p></div>',acts:'<button type="button" class="alt" data-sug="'+esc(q)+'">Suggest it to the developer</button>',imgs:[]};
+}
+
+var AI_EX=['How do I clean the LCG?','How do I load a program on the AE?','What does G50 do?'];
+function aiSg(list){return (list&&list.length)?'<div class="ai-sg">'+list.slice(0,3).map(function(x){return '<button type="button" data-q="'+esc(x)+'">'+esc(x)+'</button>'}).join('')+'</div>':''}
+function aiTalk(text,sug){return {found:true,kind:'chat',html:String(text).split('\n').map(function(l){return '<p>'+esc(l)+'</p>'}).join('')+aiSg(sug),acts:'',imgs:[]}}
+function aiOff(){return {found:false,kind:'off',html:'<p>I can only help with our machines and guides, so that one is outside what I can do.</p><p>Here are a few things you can ask me:</p>'+aiSg(AI_EX),acts:'',imgs:[]}}
+function aiChat(q){
+ var t=' '+q.toLowerCase().replace(/[^a-z0-9' ]+/g,' ').replace(/\s+/g,' ').trim()+' ',words=t.trim().split(' ').length,me=(SESS&&SESS.n)?SESS.n:'';
+ if(words<=5&&/^ (hi|hello|hey|hiya|yo|hola|good (morning|afternoon|evening)|morning|afternoon|evening)( there| mate| bud)? /.test(t)&&!/ (clean|load|error|tool|machine|lcg|ae|cut|program) /.test(t))return aiTalk('Hi'+(me?' '+me:'')+'! I\u2019m your guide assistant. I can help with our machines, cleaning, loading programs, error codes and the special tools. What do you need?',AI_EX);
+ if(words<=6&&/^ (thanks|thank you|thx|cheers|ta|great|perfect|brilliant|nice one|legend|ok thanks|okay thanks|cool thanks|got it|ok|okay|cool) /.test(t))return aiTalk('You\u2019re welcome! Is there anything else I can help with?',[]);
+ if(words<=6&&/^ (bye|goodbye|see you|see ya|cya|that s all|thats all|no thanks|nothing else) /.test(t))return aiTalk('No problem. Come back any time you need a hand.',[]);
+ if(words<=8&&/^ (help|help me|what can you do|what can you help with|what do you do|who are you|what are you|what do you know|how does this work|how do you work|options|menu) /.test(t))return aiTalk('I\u2019m the guide assistant. I answer from our own guides: cleaning, loading programs, error codes, the utility buttons and the special tools, for the LCG, AE and the other machines. If something is not in the guide I will say so, and you can suggest it to the developer.',AI_EX);
+ if(AI.last){
+  if(words<=9&&/ (video|watch|play it|show me how) /.test(t))return AI.last.video?{found:true,kind:'chat',html:'<p>Here is the video for <b>'+esc(AI.last.title)+'</b>.</p>',acts:'<button type="button" class="vbtn" data-v="'+esc(AI.last.video)+'">\u25b6 Watch video</button>',imgs:[]}:aiTalk('There is no video for \u201c'+AI.last.title+'\u201d yet. I can open the guide for you if you like.',[]);
+  if(words<=7&&(/^ (open|show) (it|that|this|the guide|the page) /.test(t)||/^ open /.test(t)&&/ (it|that|guide) /.test(t)))return {found:true,kind:'chat',html:'<p>Sure, here it is.</p>',acts:'<button type="button" data-k="'+AI.last.k+'">Open \u201c'+esc(AI.last.title)+'\u201d</button>',imgs:[]};
+ }
+ return null;
+}
+var AI_MNAME={lcg:'LCG',ae:'AE',ensis:'ENSIS',emz:'EMZ',press:'Press Brakes',brake:'Press Brakes',brakes:'Press Brakes'};
+function aiFollow(q){
+ if(!AI.lastQ)return null;
+ var ws=aiTok(q).filter(function(w){return !AI_STOP[w]&&['what','about','and','for','on','the','how','also','too'].indexOf(w)<0});
+ if(ws.length&&ws.length<=2&&ws.every(function(w){return AI_MNAME[w]})){return AI.lastQ.replace(/\b(lcg|ae|ensis|emz|press brakes?)\b/gi,' ').replace(/\s+/g,' ')+' on the '+AI_MNAME[ws[0]]}
+ return null;
 }
 function aiLocal(q){
  var r=aiSearch(q);
  if(r.none)return {found:false,html:'<p>Type a question about the guides, for example <i>how do I clean the lens?</i></p>',acts:'',imgs:[]};
  if(r.terms&&r.terms.length&&r.terms.every(function(t){return AI_MACH[t]})){var mk=AI_MACH_KEY[r.terms[0]];var mc=AI.kb.filter(function(c){return c.id===mk&&c.kind==='menu'})[0];if(mc)r.hits=[{c:mc,sc:99,m:1}]}
- if(!r.hits.length)return aiNotFound(q);
+ if(!r.hits.length){var kn=(r.terms||[]).filter(function(t){return AI.df[t]||(AI_SYN[t]&&AI_SYN[t].some(function(x){return AI.df[x]}))});if(r.terms&&r.terms.length&&!kn.length&&!r.terms.some(function(t){return /^[a-z]{1,4}[0-9]+$/.test(t)}))return aiOff();return aiNotFound(q)}
  var real=r.hits.filter(function(x){return x.c.kind!=='soon'}),soonHit=r.hits.filter(function(x){return x.c.kind==='soon'})[0];
  var soonTitle=r.hits.filter(function(x){return x.c.kind==='soon'&&r.terms.some(function(t){return x.c.tt[t]})})[0];
  if(!real.length||(real[0].c.kind==='menu'&&soonTitle))return aiNotFound(q,'That part of the guide is not written yet.');
  r.hits=real;
+ if(!r.terms.some(function(t){return AI_MACH[t]})&&real.length>1){var a0=real[0],b0=real.slice(1).filter(function(x){return x.c.title===a0.c.title&&x.c.path.split(' > ')[0]!==a0.c.path.split(' > ')[0]})[0];if(b0&&b0.sc>=a0.sc*0.85){var ms=[a0.c.path.split(' > ')[0],b0.c.path.split(' > ')[0]];return {found:true,kind:'clarify',html:'<p>Which machine is that for?</p><div class="ai-sg">'+ms.map(function(m){return '<button type="button" data-q="'+esc(q+' on the '+m)+'">'+esc(m)+'</button>'}).join('')+'</div>',acts:'',imgs:[]}}}
  var top=real[0].c,h='',acts='',imgs=[];
  if(top.kind==='guide'){
   var full=top.steps.reduce(function(a,s){return a+(s.d||'').length+(s.list||[]).join(' ').length+(s.note||'').length},0)<=950;
@@ -948,18 +975,22 @@ function aiLocal(q){
  var seen={};seen[top.k]=1;var rel=[];
  r.hits.slice(1).forEach(function(x){if(!seen[x.c.k]&&x.sc>=r.hits[0].sc*0.55&&rel.length<2&&x.c.kind!=='soon'){seen[x.c.k]=1;rel.push(x.c)}});
  rel.forEach(function(c){acts+='<button type="button" class="alt" data-k="'+c.k+'">Also: '+esc(c.path.split(' > ')[0])+' \u2013 '+esc(c.title)+'</button>'});
- return {found:true,html:h,acts:acts,imgs:imgs};
+ var lvid=top.video||((top.steps||[]).filter(function(x){return x.video})[0]||{}).video||'';
+ return {found:true,kind:'answer',last:{k:top.k,title:top.title,video:lvid},html:h,acts:acts,imgs:imgs};
 }
 function aiFromRemote(j,q){
- if(!j.found)return aiNotFound(q,j.answer&&j.answer.length<140?j.answer:undefined);
  aiIndex();
+ var kind=j.kind||(j.found?'answer':'not_in_guide'),sg=aiSg(Array.isArray(j.suggestions)?j.suggestions.filter(function(x){return typeof x==='string'&&x.length<=70}):[]);
+ var paras=String(j.answer).split(/\n{1,}/).filter(Boolean).map(function(l){return '<p>'+esc(l)+'</p>'}).join('');
+ if(kind==='not_in_guide'){var nf=aiNotFound(q,j.answer&&j.answer.length<140?j.answer:undefined);nf.html+=sg;return nf}
+ if(kind==='chat'||kind==='clarify'||kind==='off_topic')return {found:kind!=='off_topic',kind:kind==='off_topic'?'off':kind,html:paras+sg,acts:'',imgs:[]};
  var byId={};AI.kb.forEach(function(c){byId[c.id]=c});
  var src=(j.sources||[]).map(function(id){return byId[id]}).filter(Boolean).slice(0,3);
- var h=String(j.answer).split(/\n{1,}/).filter(Boolean).map(function(l){return '<p>'+esc(l)+'</p>'}).join('');
- var media=[];src.forEach(function(c){if(c.kind==='guide')c.steps.forEach(function(s){media.push(s)});else media.push(c)});
+ var media=[];src.forEach(function(c){if(c.kind==='guide')c.steps.forEach(function(x){media.push(x)});else media.push(c)});
  var md=aiMediaHtml(media),acts=md.acts,seen={};
  src.forEach(function(c){if(!seen[c.k]&&c.kind!=='soon'){seen[c.k]=1;acts+='<button type="button" data-k="'+c.k+'">Open \u201c'+esc(GUIDES[c.k].title)+'\u201d</button>'}});
- return {found:true,html:h+md.html,acts:acts,imgs:md.imgs};
+ var f0=src[0],lv=f0?(f0.video||((f0.steps||[]).filter(function(x){return x.video})[0]||{}).video||''):'';
+ return {found:true,kind:'answer',last:f0?{k:f0.k,title:f0.title,video:lv}:null,html:paras+md.html+sg,acts:acts,imgs:md.imgs};
 }
 function aiConfig(){
  return fetch('assistant.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():{}}).then(function(j){
@@ -967,7 +998,7 @@ function aiConfig(){
  },function(){AI.ep=''});
 }
 function aiRemote(q){
- return fetch(AI.ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:q,hist:AI.hist.slice(-6),nick:SESS.n,hv:SESS.hv})}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){if(!j||typeof j.answer!=='string'||typeof j.found!=='boolean')throw new Error('bad');return j});
+ return fetch(AI.ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({q:q,hist:AI.hist.slice(-10),nick:SESS.n,hv:SESS.hv})}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){if(!j||typeof j.answer!=='string'||(typeof j.found!=='boolean'&&typeof j.kind!=='string'))throw new Error('bad');return j});
 }
 function aiAdd(cls,html){
  var log=document.getElementById('ailog'),d=document.createElement('div');d.className='ai-m '+cls;d.innerHTML=html;log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
@@ -984,10 +1015,11 @@ function aiAsk(q){
  var inp=document.getElementById('aiq');inp.value='';var chips=document.getElementById('aichips');if(chips)chips.style.display='none';
  aiAdd('me',esc(q));AI.busy=true;document.getElementById('aisend').disabled=true;
  var node=aiAdd('bot','<span class="ai-dots"><span></span><span></span><span></span></span>');
- var done=function(res,text){aiShow(res,node);AI.hist.push({role:'user',content:q},{role:'assistant',content:text||res.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,500)});if(AI.hist.length>12)AI.hist=AI.hist.slice(-12);AI.busy=false;document.getElementById('aisend').disabled=false;inp.focus()};
+ var done=function(res,text){aiShow(res,node);if(res.last)AI.last=res.last;AI.hist.push({role:'user',content:q},{role:'assistant',content:text||res.html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,500)});if(AI.hist.length>16)AI.hist=AI.hist.slice(-16);AI.busy=false;document.getElementById('aisend').disabled=false;inp.focus()};
  aiConfig().then(function(){
   document.getElementById('aimode').textContent=AI.ep?'Claude':'Guide search';
-  if(!AI.ep){done(aiLocal(q));return}
+  if(!AI.ep){var pre=aiChat(q);if(pre){done(pre);return}var fq=aiFollow(q);if(!fq)AI.lastQ=q;done(aiLocal(fq||q));return}
+  AI.lastQ=q;
   return aiRemote(q).then(function(j){done(aiFromRemote(j,q),j.answer)},function(){var l=aiLocal(q);l.html='<p><small>The AI is not reachable right now. This is the closest match in the guides.</small></p>'+l.html;done(l)});
  }).catch(function(){done(aiNotFound(q))});
 }
@@ -1003,7 +1035,7 @@ function aiBuild(){
  document.body.appendChild(p);document.body.appendChild(b);
  function intro(){
   var log=document.getElementById('ailog');log.innerHTML='';
-  aiAdd('bot','<p>Hi! Ask me anything about our guides. I only answer from what is written in them. If it is not there, I will say so.</p>');
+  aiAdd('bot','<p>Hi! I\u2019m your guide assistant. Ask me about our machines, the guides, error codes and tools. I answer from what is written in our guides, and if something is not there I\u2019ll tell you.</p>');
   var ch=document.getElementById('aichips');ch.style.display='';ch.innerHTML=['How do I clean the LCG?','What does G50 do?','How do I clean the lens?'].map(function(x){return '<button type="button" data-q="'+esc(x)+'">'+esc(x)+'</button>'}).join('');
  }
  AI.intro=intro;intro();
@@ -1031,7 +1063,7 @@ function aiClose(){var p=document.getElementById('aipanel'),b=document.getElemen
 function aiSync(){
  var b=document.getElementById('aibtn'),p=document.getElementById('aipanel');if(!b||!p)return;
  var on=!!SESS;b.style.display=on?'':'none';
- if(!on){aiClose();AI.hist=[];AI.busy=false;if(AI.intro)AI.intro();var s=document.getElementById('aisend');if(s)s.disabled=false}
+ if(!on){aiClose();AI.hist=[];AI.last=null;AI.lastQ='';AI.busy=false;if(AI.intro)AI.intro();var s=document.getElementById('aisend');if(s)s.disabled=false}
 }
 aiBuild();aiSync();
 
